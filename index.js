@@ -23,10 +23,11 @@ async function run() {
 
     const database = client.db('VolunteersData');
     const collection = database.collection('volunteerSingleData');
-
     const database2 = client.db('Volunteers_PostData');
     const collection2 = database2.collection('volunteer-request');
     const volunteerPostsCollection = database2.collection('volunteerPosts');
+    const database3 = client.db('volunteerAddData')
+    const volunteerAddData = database3.collection('volunteerAddedData')
 
     app.get('/volunteerSingleData', async (req, res) => {
       try {
@@ -36,6 +37,64 @@ async function run() {
         res.status(500).send({ error: "Failed to fetch volunteer data." });
       }
     });
+   app.post('/volunteerAddPosts', async (req, res) => {
+  try {
+    const data = req.body;
+    const result = await volunteerAddData.insertOne(data);
+
+    res.status(201).send({
+      success: true,
+      message: "Volunteer post added successfully.",
+      insertedId: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Error adding volunteer post:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to add volunteer post.",
+      error: error.message,
+    });
+  }
+   });
+    
+    app.get('/volunteerAddPosts', async (req, res) => {
+  try {
+    const titleQuery = req.query.title;
+
+    let query = {};
+    if (titleQuery) {
+      query = { title: { $regex: titleQuery, $options: "i" } }; 
+    }
+
+    const data = await volunteerAddData.find(query).toArray();
+    res.send({ success: true, data });
+  } catch (err) {
+    res.status(500).send({ success: false, message: "Failed to fetch data" });
+  }
+});
+
+    
+    
+    
+app.get('/volunteerAddPosts', async (req, res) => {
+  try {
+    const data = await volunteerAddData.find().toArray();
+    res.status(200).send({
+      success: true,
+      message: "Volunteer posts retrieved successfully.",
+      data: data,
+    });
+  } catch (error) {
+    console.error("Error retrieving volunteer posts:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to retrieve volunteer posts.",
+      error: error.message,
+    });
+  }
+});
+
+
 
     app.post('/volunteerRequest', async (req, res) => {
       try {
@@ -64,7 +123,11 @@ async function run() {
       }
     });
 
-    console.log("✅ Connected to MongoDB");
+
+
+
+
+    console.log("Connected to MongoDB");
   } catch (err) {
     console.error(" MongoDB connection error:", err);
   }
@@ -72,7 +135,7 @@ async function run() {
 run();
 
 app.get('/', (req, res) => {
-  res.send('✅ 3000 port all ok!');
+  res.send(' 3000 port all ok!');
 });
 
 app.listen(port, () => {
