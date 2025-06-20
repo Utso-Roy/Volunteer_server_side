@@ -123,7 +123,51 @@ app.get('/volunteerAddPosts', async (req, res) => {
       }
     });
 
+    app.get('/volunteerRequest', async (req, res) => {
 
+      const result = await collection2.find().toArray();
+      res.send(result)
+
+  
+})
+
+
+app.delete('/volunteerRequest/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+
+  try {
+    const result = await collection2.deleteOne(query);
+    if (result.deletedCount === 1) {
+      res.send({ success: true, message: "Deleted successfully" });
+    } else {
+      res.status(404).send({ success: false, message: "Post not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).send({ success: false, message: "Server error" });
+  }
+});
+    app.put('/volunteerRequest/:id', async (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+
+  try {
+    const result = await collection2.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedData }
+    );
+
+    if (result.modifiedCount > 0) {
+      res.send({ success: true, message: "Post updated successfully" });
+    } else {
+      res.send({ success: false, message: "No changes made or post not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ success: false, message: "Server error" });
+  }
+});
 
 
 
