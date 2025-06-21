@@ -37,6 +37,7 @@ async function run() {
         res.status(500).send({ error: "Failed to fetch volunteer data." });
       }
     });
+
    app.post('/volunteerAddPosts', async (req, res) => {
   try {
     const data = req.body;
@@ -93,6 +94,47 @@ app.get('/volunteerAddPosts', async (req, res) => {
     });
   }
 });
+   app.delete('/volunteerAddPosts/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const result = await volunteerAddData.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount > 0) {
+      res.send({ success: true, message: "Deleted successfully." });
+    } else {
+      res.send({ success: false, message: "No matching post found." });
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).send({ success: false, message: "Server error." });
+  }
+});
+const { ObjectId } = require('mongodb'); 
+
+app.put('/volunteerAddPosts/:id', async (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: updatedData,
+  };
+
+  try {
+    const result = await volunteerAddData.updateOne(filter, updateDoc);
+
+    if (result.modifiedCount > 0) {
+      res.send({ success: true, message: 'Post updated successfully' });
+    } else {
+      res.send({ success: false, message: 'No post was updated' });
+    }
+  } catch (error) {
+    console.error('Update error:', error);
+    res.status(500).send({ success: false, message: 'Server error' });
+  }
+});
+
 
 
 
