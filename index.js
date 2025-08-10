@@ -19,7 +19,7 @@ const client = new MongoClient(process.env.MONGODB_URI, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const database = client.db('VolunteersData');
     const collection = database.collection('volunteerSingleData');
@@ -58,27 +58,41 @@ async function run() {
   }
    });
     
-    app.get('/volunteerAddPosts', async (req, res) => {
+
+
+app.get('/volunteerPostData', async (req, res) => {
   try {
-    const titleQuery = req.query.title;
+    const titleQuery = req.query.title || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 4;
+    const skip = (page - 1) * limit;
 
     let query = {};
     if (titleQuery) {
-      query = { title: { $regex: titleQuery, $options: "i" } }; 
+      query = { title: { $regex: titleQuery, $options: "i" } };
     }
 
-    const data = await volunteerAddData.find(query).toArray();
-    res.send({ success: true, data });
+    const total = await volunteerAddData.countDocuments(query);
+    const data = await volunteerAddData.find(query).skip(skip).limit(limit).toArray();
+
+    res.send({
+      success: true,
+      data,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (err) {
     res.status(500).send({ success: false, message: "Failed to fetch data" });
   }
 });
 
+
     
     
     
-app.get('/volunteerAddPosts', async (req, res) => {
-  try {
+    app.get('/volunteerAddPosts', async (req, res) => {
+      try {
     const data = await volunteerAddData.find().toArray();
     res.status(200).send({
       success: true,
